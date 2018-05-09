@@ -3,8 +3,12 @@
   "version": "1.0.0",
   "description": "",
   "main": "lib/index.js",
+  "types": "/lib/index.d.ts",
   "publishConfig": {
     "access": "public"
+  },
+  "engines": {
+    "node": ">=9.2.0"
   },
   "devDependencies": {
     "tslint": "^5.10.0",
