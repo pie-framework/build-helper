@@ -1,4 +1,4 @@
-const processFix = (log: (...any) => any, onSigInt: () => void) => {
+export const processFix = (log: (...any) => any, onSigInt: () => void) => {
   process.on('unhandledRejection', error => {
     // Will print "unhandledRejection err is not defined"
     log(error.message);
@@ -19,5 +19,3 @@ const processFix = (log: (...any) => any, onSigInt: () => void) => {
     log('done.');
   });
 };
-
-export default processFix;
