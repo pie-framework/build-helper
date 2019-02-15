@@ -38,7 +38,7 @@ export class Commands {
     deployToNow(dir, token, alias, this.p.now, this.dryRun);
   }
 
-  runCmds(cmds: string[], opts?: any) {
+  runCmds(cmds: string[], opts: any = {}) {
     cmds.forEach(c => {
       log('[cmd]: ', c, ` - in [${opts.cwd ? opts.cwd : process.cwd()}]`);
 
