@@ -3,22 +3,31 @@ import debug from 'debug';
 
 const log = debug('build-helper:deploy-to-now');
 
+const runCmd = (c, dryRun, opts: any = {}): string | undefined => {
+  if (dryRun) {
+    log(c);
+    return;
+  }
+  return execSync(c, opts).toString();
+};
+
 export const deployToNow = (
   dir,
   token,
   alias?: string,
-  nowPath: string = 'now'
+  nowPath: string = 'now',
+  dryRun: boolean = false
 ) => {
   const deployCmd = `${nowPath}  ${dir} ${
     token ? `--token=${token}` : ''
   } --public`;
-  log('cmd: ', deployCmd);
-  const url = execSync(deployCmd).toString();
+
+  const url = runCmd(deployCmd, dryRun);
 
   log('url: ', url);
 
   if (!url) {
-    return;
+    log('url is missing - continuing for info purposes');
   }
 
   if (alias) {
@@ -26,7 +35,7 @@ export const deployToNow = (
       token ? `--token=${token}` : ''
     }`;
 
-    log('aliasCmd', aliasCmd);
-    const result = execSync(aliasCmd, { stdio: 'inherit' });
+    const result = runCmd(aliasCmd, dryRun || !url, { stdio: 'inherit' });
+    return result;
   }
 };
