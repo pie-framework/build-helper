@@ -87,8 +87,8 @@ export class Commands {
 
   build() {
     this.clean();
-    this.babel();
     this.lint();
+    this.babel();
     this.test();
   }
 
@@ -108,7 +108,10 @@ export class Commands {
     this.runCmds([
       `${this.p.lerna} exec -- ${
         this.p.babel
-      } --ignore '/__test__/','/__tests__/' src -d lib --copy-files --source-maps`
+      } --ignore '/__test__/','/__tests__/' src -d lib --copy-files --source-maps --config-file ${resolve(
+        this.projectRoot,
+        '.babelrc'
+      )}`
     ]);
   }
 
