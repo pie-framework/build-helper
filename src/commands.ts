@@ -38,15 +38,31 @@ export class Commands {
     deployToNow(dir, token, alias, this.p.now, this.dryRun);
   }
 
-  runCmds(cmds: string[], opts: any = {}) {
-    cmds.forEach(c => {
+  runCmds(cmds: string[], opts: any = {}): Buffer[] {
+    const out = cmds.map(c => {
       log('[cmd]: ', c, ` - in [${opts.cwd ? opts.cwd : process.cwd()}]`);
 
       if (this.dryRun) {
         return;
       }
-      execSync(c, { stdio: 'inherit', ...opts });
+      return execSync(c, { stdio: 'inherit', ...opts });
     });
+
+    if (!this.dryRun) {
+      return out;
+    }
+  }
+
+  isGitTreeClean(): boolean {
+    if (this.dryRun) {
+      return true;
+    }
+
+    const d = this.runCmds(['git diff']);
+    if (Array.isArray(d)) {
+      const b = d[0];
+      return b.toString() === '';
+    }
   }
 
   release() {
@@ -70,10 +86,16 @@ export class Commands {
       this.runCmds([
         `git remote set-url origin https://${GITHUB_TOKEN}@github.com/${TRAVIS_REPO_SLUG}.git`,
         `git checkout ${TRAVIS_BRANCH}`,
-        'git rev-parse --short HEAD',
-        `git commit . -m "[travis skip] commit post install tree"`,
-        `git status`
+        'git rev-parse --short HEAD'
       ]);
+
+      if (!this.isGitTreeClean()) {
+        this.runCmds([
+          `git commit . -m "[travis skip] commit post install tree"`
+        ]);
+      }
+
+      this.runCmds([`git status`]);
     }
 
     this.build();
