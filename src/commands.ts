@@ -85,9 +85,9 @@ export class Commands {
 
   build() {
     this.clean();
-    this.test();
-    this.lint();
     this.babel();
+    this.lint();
+    this.test();
   }
 
   clean() {
