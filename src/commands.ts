@@ -38,19 +38,17 @@ export class Commands {
     deployToNow(dir, token, alias, this.p.now, this.dryRun);
   }
 
-  runCmds(cmds: string[], opts: any = {}): Buffer[] {
-    const out = cmds.map(c => {
-      log('[cmd]: ', c, ` - in [${opts.cwd ? opts.cwd : process.cwd()}]`);
+  runCmd(cmd, opts: any = {}): Buffer | string | undefined {
+    log('[cmd]: ', cmd, ` - in [${opts.cwd ? opts.cwd : process.cwd()}]`);
 
-      if (this.dryRun) {
-        return;
-      }
-      return execSync(c, { stdio: 'inherit', ...opts });
-    });
-
-    if (!this.dryRun) {
-      return out;
+    if (this.dryRun) {
+      return undefined;
     }
+    return execSync(cmd, { stdio: 'inherit', ...opts });
+  }
+
+  runCmds(cmds: string[], opts: any = {}): (Buffer | string | undefined)[] {
+    return cmds.map(c => this.runCmd(c, opts));
   }
 
   isGitTreeClean(): boolean {
@@ -58,11 +56,12 @@ export class Commands {
       return true;
     }
 
-    const d = this.runCmds(['git diff']);
-    if (Array.isArray(d)) {
-      const b = d[0];
-      return b.toString() === '';
+    const d = this.runCmd('git diff');
+
+    if (!d) {
+      return true;
     }
+    return d && d.toString && d.toString() === '';
   }
 
   release() {
