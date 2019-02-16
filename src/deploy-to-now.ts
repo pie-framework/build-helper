@@ -4,11 +4,17 @@ import debug from 'debug';
 const log = debug('build-helper:deploy-to-now');
 
 const runCmd = (c, dryRun, opts: any = {}): string | undefined => {
+  log(c);
   if (dryRun) {
-    log(c);
     return;
   }
-  return execSync(c, opts).toString();
+  const result = execSync(c, opts);
+  log(c, 'result:', result);
+  if (result) {
+    return result.toString();
+  } else {
+    return result;
+  }
 };
 
 export const deployToNow = (
