@@ -52,15 +52,13 @@ export class Commands {
   }
 
   isGitTreeClean(): boolean {
-    if (this.dryRun) {
-      return true;
-    }
+    log('[isGitTreeClean]');
 
     const d = this.runCmd('git diff');
-
-    if (!d) {
+    if (this.dryRun || !d) {
       return true;
     }
+
     return d && d.toString && d.toString() === '';
   }
 
