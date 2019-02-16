@@ -70,7 +70,9 @@ export class Commands {
       this.runCmds([
         `git remote set-url origin https://${GITHUB_TOKEN}@github.com/${TRAVIS_REPO_SLUG}.git`,
         `git checkout ${TRAVIS_BRANCH}`,
-        'git rev-parse --short HEAD'
+        'git rev-parse --short HEAD',
+        `git commit . -m "[travis skip] commit post install tree"`,
+        `git status`
       ]);
     }
 
