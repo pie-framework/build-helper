@@ -49,7 +49,13 @@ export class Commands {
     cmds: string[],
     opts: any = {}
   ): Promise<(Buffer | string | undefined)[]> {
-    return Promise.all(cmds.map(c => this.runCmd(c, opts)));
+    return this.series(cmds, cmd => this.runCmd(cmd, opts));
+  }
+
+  private series(cmds: string[], fn: (cmd: string) => Promise<any>) {
+    return cmds.reduce((p, cmd) => {
+      return p.then(() => fn(cmd));
+    }, Promise.resolve());
   }
 
   async isGitTreeClean(): Promise<boolean> {
