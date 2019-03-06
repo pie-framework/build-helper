@@ -1,12 +1,11 @@
 import { deployToNow } from './deploy-to-now';
-
-const { execSync } = require('child_process');
+import { execPromise } from './exec';
+import { rmNextChangelogs, buildNextChangelogs } from './changelog';
 const { resolve } = require('path');
 const debug = require('debug');
 const log = debug('build-helper:commands');
 const cmdLog = debug('build-helper:commands:cmd');
 const invariant = require('invariant');
-
 const bin = (root, n) => resolve(root, 'node_modules/.bin', n);
 const root = (root, n) => resolve(root, n);
 
@@ -32,29 +31,31 @@ export class Commands {
     return bin(this.projectRoot, n);
   }
 
-  staticToNow(dir: string, alias?: string) {
+  staticToNow(dir: string, alias?: string): Promise<any> {
     const token = process.env.NOW_TOKEN;
-
-    deployToNow(dir, token, alias, this.p.now, this.dryRun);
+    return deployToNow(dir, token, alias, this.p.now, this.dryRun);
   }
 
-  runCmd(cmd, opts: any = {}): Buffer | string | undefined {
+  runCmd(cmd, opts: any = {}): Promise<Buffer | string | undefined> {
     log('[cmd]: ', cmd, ` - in [${opts.cwd ? opts.cwd : process.cwd()}]`);
 
     if (this.dryRun) {
-      return undefined;
+      return Promise.resolve(undefined);
     }
-    return execSync(cmd, { stdio: 'inherit', ...opts });
+    return execPromise(cmd, { stdio: 'inherit', ...opts });
   }
 
-  runCmds(cmds: string[], opts: any = {}): (Buffer | string | undefined)[] {
-    return cmds.map(c => this.runCmd(c, opts));
+  runCmds(
+    cmds: string[],
+    opts: any = {}
+  ): Promise<(Buffer | string | undefined)[]> {
+    return Promise.all(cmds.map(c => this.runCmd(c, opts)));
   }
 
-  isGitTreeClean(): boolean {
+  async isGitTreeClean(): Promise<boolean> {
     log('[isGitTreeClean]');
 
-    const d = this.runCmd('git diff');
+    const d = await this.runCmd('git diff');
     if (this.dryRun || !d) {
       return true;
     }
@@ -62,7 +63,26 @@ export class Commands {
     return d && d.toString && d.toString() === '';
   }
 
-  release() {
+  beforePublish(): Promise<any> {
+    if (this.args.next) {
+      const dir = resolve(this.projectRoot, 'packages');
+      log('[beforePublish] dir:', dir);
+      return buildNextChangelogs(dir);
+    } else {
+      return Promise.resolve(undefined);
+    }
+  }
+
+  afterPublish(): Promise<any> {
+    if (this.args.next) {
+      const dir = resolve(this.projectRoot, 'packages');
+      log('[afterPublish] dir:', dir);
+      return rmNextChangelogs(dir);
+    }
+    return Promise.resolve(undefined);
+  }
+
+  async release() {
     cmdLog('----> release');
 
     const {
@@ -80,43 +100,55 @@ export class Commands {
       log(
         '-----> running in TRAVIS - checkout the branch (detached head doesnt work with lerna)'
       );
-      this.runCmds([
+      await this.runCmds([
         `git remote set-url origin https://${GITHUB_TOKEN}@github.com/${TRAVIS_REPO_SLUG}.git`,
         `git checkout ${TRAVIS_BRANCH}`,
         'git rev-parse --short HEAD'
       ]);
 
-      if (!this.isGitTreeClean()) {
-        this.runCmds([
+      if (!(await this.isGitTreeClean())) {
+        await this.runCmds([
           `git commit . -m "[travis skip] commit post install tree"`
         ]);
       }
 
-      this.runCmds([`git status`]);
+      await this.runCmds([`git status`]);
     }
 
-    this.build();
+    await this.build();
 
-    const releaseCmd = `${this.p.lerna} publish --conventional-commits --yes ${
-      this.args.next ? '--canary --preid next --dist-tag next' : ''
+    if (!this.args.skipPublishHooks) {
+      await this.beforePublish();
+    }
+
+    const releaseCmd = `${this.p.lerna} publish --conventional-commits ${
+      this.args.interactive ? '' : '--yes'
+    } ${
+      this.args.next
+        ? '--canary --preid next --dist-tag next --include-merged-tags'
+        : ''
     }`;
 
-    this.runCmds([releaseCmd]);
+    await this.runCmds([releaseCmd]);
+
+    if (!this.args.skipPublishHooks) {
+      await this.afterPublish();
+    }
   }
 
-  build() {
-    this.clean();
-    this.lint();
-    this.babel();
-    this.test();
+  async build() {
+    await this.clean();
+    await this.lint();
+    await this.babel();
+    await this.test();
   }
 
   clean() {
-    this.runCmds([`${this.p.lerna} exec -- rm -fr lib`]);
+    return this.runCmds([`${this.p.lerna} exec -- rm -fr lib`]);
   }
 
   lint() {
-    this.runCmds([
+    return this.runCmds([
       `${this.p.lerna} exec -- ${this.p.eslint} --ignore-path ${
         this.p.eslintignore
       } --ext .js --ext .jsx src`
@@ -125,7 +157,7 @@ export class Commands {
 
   babel() {
     console.log('>> babel override for babel 7');
-    this.runCmds([
+    return this.runCmds([
       `${this.p.lerna} exec -- ${
         this.p.babel
       } --ignore '**/__test__/**','**/__tests__/**' src -d lib --copy-files --source-maps --root-mode upward`
@@ -133,6 +165,21 @@ export class Commands {
   }
 
   test() {
-    this.runCmds([`${this.p.jest}`]);
+    return this.runCmds([`${this.p.jest}`]);
+  }
+
+  execute() {
+    const knownActions = this.args._.filter(a => this[a]);
+
+    if (knownActions.length !== this.args._.length) {
+      return Promise.reject(new Error(`unknown actions: ${this.args._}`));
+    }
+
+    return knownActions.reduce((acc, action) => {
+      return acc.then(() => {
+        log(`execute ${action}..`);
+        return this[action]();
+      });
+    }, Promise.resolve({}));
   }
 }

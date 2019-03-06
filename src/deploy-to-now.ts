@@ -1,14 +1,13 @@
-import { execSync } from 'child_process';
 import debug from 'debug';
-
+import { execPromise } from './exec';
 const log = debug('build-helper:deploy-to-now');
 
-const runCmd = (c, dryRun, opts: any = {}): string | undefined => {
+const runCmd = async (c, dryRun, opts: any = {}): Promise<any> => {
   log(c);
   if (dryRun) {
     return;
   }
-  const result = execSync(c, opts);
+  const result = await execPromise(c, opts);
   log(c, 'result:', result);
   if (result) {
     return result.toString();
@@ -17,18 +16,18 @@ const runCmd = (c, dryRun, opts: any = {}): string | undefined => {
   }
 };
 
-export const deployToNow = (
+export const deployToNow = async (
   dir,
   token,
   alias?: string,
   nowPath: string = 'now',
   dryRun: boolean = false
-) => {
+): Promise<string> => {
   const deployCmd = `${nowPath}  ${dir} ${
     token ? `--token=${token}` : ''
   } --public`;
 
-  const url = runCmd(deployCmd, dryRun);
+  const url = await runCmd(deployCmd, dryRun);
 
   log('url: ', url);
 
@@ -41,7 +40,7 @@ export const deployToNow = (
       token ? `--token=${token}` : ''
     }`;
 
-    const result = runCmd(aliasCmd, dryRun || !url, { stdio: 'inherit' });
+    const result = await runCmd(aliasCmd, dryRun || !url, { stdio: 'inherit' });
     return result;
   }
 };
