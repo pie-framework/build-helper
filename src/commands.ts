@@ -94,7 +94,7 @@ export class Commands {
   }
 
   async release() {
-    cmdLog('----> release');
+    cmdLog('----> release', this.args);
 
     const {
       TRAVIS,
@@ -143,7 +143,7 @@ export class Commands {
     };
 
     const releaseCmd = `${this.p.lerna} publish --conventional-commits ${
-      this.args.lernaLogLevel ? `--log-level ${this.args.lernaLogLevel}` : ''
+      this.args.lernaLogLevel ? `--loglevel ${this.args.lernaLogLevel}` : ''
     } ${this.args.interactive ? '' : '--yes'} ${
       this.args.next ? getNextOpts() : ''
     }`;
