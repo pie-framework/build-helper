@@ -126,13 +126,25 @@ export class Commands {
       await this.beforePublish();
     }
 
+    const getNextOpts = () => {
+      const nextOpts = [
+        '--canary',
+        '--preid next',
+        '--dist-tag next',
+        '--include-merged-tag',
+        '--force-publish'
+      ];
+
+      if (this.args.skipForcePublish) {
+        nextOpts.pop();
+      }
+
+      return nextOpts.join(' ');
+    };
+
     const releaseCmd = `${this.p.lerna} publish --conventional-commits ${
       this.args.interactive ? '' : '--yes'
-    } ${
-      this.args.next
-        ? '--canary --preid next --dist-tag next --include-merged-tags'
-        : ''
-    }`;
+    } ${this.args.next ? getNextOpts() : ''}`;
 
     await this.runCmds([releaseCmd]);
 
