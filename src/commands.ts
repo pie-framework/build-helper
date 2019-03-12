@@ -132,6 +132,17 @@ export class Commands {
         '--preid next',
         '--dist-tag next',
         '--include-merged-tag',
+        /**
+         * Lerna only checks the last commit to detect changes, so it misses any historicaly changes since
+         * the last tag. Ideally we wouldn't force-publish but just get it to find these changes correctly?
+         * See: https://github.com/lerna/lerna/blob/master/utils/collect-updates/collect-updates.js#L37
+         * > from src:
+         * // if it's a merge commit, it will return all the commits that were part of the merge
+         * // ex: If `ab7533e` had 2 commits, ab7533e^..ab7533e would contain 2 commits + the merge commit
+         * committish = `${sha}^..${sha}`;
+         *
+         * We would want `${sha}~${refCount}` instead.
+         */
         '--force-publish'
       ];
 
