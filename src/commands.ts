@@ -54,7 +54,12 @@ export class Commands {
 
   private series(cmds: string[], fn: (cmd: string) => Promise<any>) {
     return cmds.reduce((p, cmd) => {
-      return p.then(() => fn(cmd));
+      return p
+        .then(() => fn(cmd))
+        .catch(e => {
+          log('error in series occured:', e.message);
+          throw e;
+        });
     }, Promise.resolve());
   }
 

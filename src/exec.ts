@@ -1,4 +1,6 @@
 import { exec } from 'child_process';
+import debug from 'debug';
+const log = debug('build-helper:exec');
 export const execPromise = (
   cmd,
   opts,
@@ -22,6 +24,13 @@ export const execPromise = (
       });
     }
     child.on('error', reject);
-    child.on('exit', () => resolve(out ? out.toString('utf8') : undefined));
+    child.on('exit', code => {
+      log(cmd, 'exit:', code);
+      if (code !== 0) {
+        reject(new Error(`cmd:  ${cmd} failed`));
+      } else {
+        resolve(out ? out.toString('utf8') : undefined);
+      }
+    });
   });
 };

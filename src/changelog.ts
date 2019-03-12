@@ -6,7 +6,7 @@ import * as conventionalChangelogCore from 'conventional-changelog-core';
 
 const NEXT_CHANGELOG = 'NEXT.CHANGELOG.md';
 
-export const getPackages = (root: string) => {
+export const getPackages = (root: string): { dir: string; pkg: any }[] => {
   const pkgs = readdirSync(root);
   return pkgs.map(p => {
     const dir = join(root, p);
