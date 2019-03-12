@@ -1,7 +1,6 @@
 export const processFix = (log: (...any) => any, onSigInt: () => void) => {
-  process.on('unhandledRejection', error => {
-    // Will print "unhandledRejection err is not defined"
-    log(error.message);
+  process.on('unhandledRejection', (reason: any) => {
+    log(reason.message);
   });
 
   if (process.platform === 'win32') {
@@ -9,8 +8,7 @@ export const processFix = (log: (...any) => any, onSigInt: () => void) => {
       input: process.stdin,
       output: process.stdout
     });
-
-    rl.on('SIGINT', () => process.emit('SIGINT'));
+    rl.on('SIGINT', () => process.emit('disconnect'));
   }
 
   process.on('SIGINT', onSigInt);
