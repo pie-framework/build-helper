@@ -143,8 +143,10 @@ export class Commands {
     };
 
     const releaseCmd = `${this.p.lerna} publish --conventional-commits ${
-      this.args.interactive ? '' : '--yes'
-    } ${this.args.next ? getNextOpts() : ''}`;
+      this.args.lernaLogLevel ? `--log-level ${this.args.lernaLogLevel}` : ''
+    } ${this.args.interactive ? '' : '--yes'} ${
+      this.args.next ? getNextOpts() : ''
+    }`;
 
     await this.runCmds([releaseCmd]);
 
