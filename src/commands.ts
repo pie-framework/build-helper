@@ -117,12 +117,6 @@ export class Commands {
         'git rev-parse --short HEAD'
       ]);
 
-      if (!(await this.isGitTreeClean())) {
-        await this.runCmds([
-          `git commit . -m "[travis skip] commit post install tree"`
-        ]);
-      }
-
       await this.runCmds([`git status`]);
     }
 
