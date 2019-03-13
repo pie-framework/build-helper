@@ -1,10 +1,11 @@
 import { processFix } from './process-fix';
 import { watch } from './babel-multiple';
 export {
-  getUnreleasedChangelog,
+  writeNextChangelogJson,
+  writeReleasedChangelogJson,
+  rmChangelogJson,
   getPackages,
-  rmNextChangelogs,
-  buildNextChangelogs
+  changelogJson
 } from './changelog';
 export { deployToNow } from './deploy-to-now';
 

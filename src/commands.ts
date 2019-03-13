@@ -1,9 +1,14 @@
 import { deployToNow } from './deploy-to-now';
 import { execPromise } from './exec';
-import { rmNextChangelogs, buildNextChangelogs } from './changelog';
+import {
+  rmChangelogJson,
+  writeNextChangelogJson,
+  writeReleasedChangelogJson
+} from './changelog';
 const { resolve } = require('path');
 const debug = require('debug');
 const log = debug('build-helper:commands');
+const err = debug('build-helper:commands:error');
 const cmdLog = debug('build-helper:commands:cmd');
 const invariant = require('invariant');
 const bin = (root, n) => resolve(root, 'node_modules/.bin', n);
@@ -74,23 +79,18 @@ export class Commands {
     return d && d.toString && d.toString() === '';
   }
 
-  beforePublish(): Promise<any> {
+  async beforePublish(): Promise<any> {
+    const dir = resolve(this.projectRoot, 'packages');
     if (this.args.next) {
-      const dir = resolve(this.projectRoot, 'packages');
       log('[beforePublish] dir:', dir);
-      return buildNextChangelogs(dir);
-    } else {
-      return Promise.resolve(undefined);
+      await writeNextChangelogJson(dir);
     }
+    await writeReleasedChangelogJson(dir);
   }
 
   afterPublish(): Promise<any> {
-    if (this.args.next) {
-      const dir = resolve(this.projectRoot, 'packages');
-      log('[afterPublish] dir:', dir);
-      return rmNextChangelogs(dir);
-    }
-    return Promise.resolve(undefined);
+    const dir = resolve(this.projectRoot, 'packages');
+    return rmChangelogJson(dir);
   }
 
   async release() {
@@ -124,6 +124,7 @@ export class Commands {
 
     if (!this.args.skipPublishHooks) {
       await this.beforePublish();
+      log('beforePublish - done...');
     }
 
     const getNextOpts = () => {
@@ -205,11 +206,24 @@ export class Commands {
       return Promise.reject(new Error(`unknown actions: ${this.args._}`));
     }
 
-    return knownActions.reduce((acc, action) => {
-      return acc.then(() => {
-        log(`execute ${action}..`);
-        return this[action]();
+    const out = knownActions
+      .reduce((acc, action) => {
+        return acc.then(() => {
+          log(`execute ${action}..`);
+          const p = this[action]();
+          log(`execute: `, p);
+          return p;
+        });
+      }, Promise.resolve({}))
+      .catch(e => {
+        err(e.message);
+        throw e;
+      })
+      .then(r => {
+        log('done!');
+        return r;
       });
-    }, Promise.resolve({}));
+    log('out: ', out);
+    return out;
   }
 }
