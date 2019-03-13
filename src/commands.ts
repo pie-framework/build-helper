@@ -85,6 +85,8 @@ export class Commands {
       log('[beforePublish] dir:', dir);
       await writeNextChangelogJson(dir);
     }
+
+    await rmChangelogJson(dir);
     await writeReleasedChangelogJson(dir);
   }
 
