@@ -190,7 +190,7 @@ export class Commands {
     return this.runCmds([
       `${this.p.lerna} exec -- ${
         this.p.babel
-      } --ignore '**/__test__/**','**/__tests__/**' src -d lib --copy-files --source-maps --root-mode upward`
+      } --ignore '**/__test__/**','**/__tests__/**' src -d lib --source-maps --root-mode upward`
     ]);
   }
 
