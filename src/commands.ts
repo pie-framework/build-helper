@@ -6,7 +6,7 @@ import {
   writeNextChangelogJson,
   writeReleasedChangelogJson
 } from './changelog';
-const { resolve } = require('path');
+const { resolve, relative } = require('path');
 const debug = require('debug');
 const log = debug('build-helper:commands');
 const err = debug('build-helper:commands:error');
@@ -51,6 +51,21 @@ export class Commands {
     return execPromise(cmd, { stdio: 'inherit', ...opts });
   }
 
+  async commit(dir: string, msg: string): Promise<Buffer | string | undefined> {
+    const result = await this.runCmd(`git status -s`, {
+      cwd: this.projectRoot
+    });
+
+    if (result === undefined || result.toString() === '') {
+      return;
+    }
+
+    return this.runCmd(
+      `git commit ./${relative(this.projectRoot, dir)} -m "${msg}"`,
+      { cwd: this.projectRoot }
+    );
+  }
+
   runCmds(
     cmds: string[],
     opts: any = {}
@@ -90,6 +105,9 @@ export class Commands {
     }
 
     await writeReleasedChangelogJson(dir);
+
+    await this.runCmd('git add .', { cwd: this.projectRoot });
+    await this.commit(this.projectRoot, '[travis skip] update changelogs');
   }
 
   afterPublish(): Promise<any> {

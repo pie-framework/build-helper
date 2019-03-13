@@ -19,16 +19,16 @@ const log = debug('build-helper:changelog');
 const NEXT_CHANGELOG = 'NEXT.CHANGELOG.json';
 const CHANGELOG = 'CHANGELOG.json';
 
-export const getPackages = (root: string): { dir: string; pkg: any }[] => {
+export const getPackages = (root: string): PkgAndDir[] => {
   const pkgs = readdirSync(root);
-  return pkgs.map(p => {
-    const dir = join(root, p);
-    return {
-      dir,
-      pkg: readJsonSync(join(dir, 'package.json'))
-    };
-  });
+  return pkgs.map(p => getPackage(join(root, p)));
 };
+export type PkgAndDir = { dir: string; pkg: any };
+
+export const getPackage = (dir: string): PkgAndDir => ({
+  dir,
+  pkg: readJsonSync(join(dir, 'package.json'))
+});
 
 class ArrayBufferWritable extends Writable {
   private parts: Buffer[];
@@ -49,35 +49,34 @@ class ArrayBufferWritable extends Writable {
 
 export const writeChangelogJson = async (
   packagesDir: string,
-  filename: string,
-  type: string
+  unreleased: boolean
 ) => {
-  const packages: { dir: string; pkg: any }[] = getPackages(packagesDir);
+  const packages: PkgAndDir[] = getPackages(packagesDir);
 
-  const promises = packages.map(async p => {
-    log('changelog for : ', p.dir);
-    const changelog = await changelogJson(p, { type });
-    return { ...p, changelog };
-  });
+  const promises = packages.map(p =>
+    writeChangelogJsonForPackage(p, unreleased)
+  );
+  return Promise.all(promises);
+};
 
-  const results = await Promise.all(promises);
-  results.forEach(r => {
-    const changelogPath = join(r.dir, filename);
-    log(type, 'path:', changelogPath);
-    writeFileSync(
-      changelogPath,
-      JSON.stringify(r.changelog, null, '  '),
-      'utf8'
-    );
-  });
-  return results;
+export const writeChangelogJsonForPackage = async (
+  pkg: PkgAndDir,
+  unreleased: boolean
+) => {
+  log('changelog for : ', pkg.dir);
+  const filename = unreleased ? NEXT_CHANGELOG : CHANGELOG;
+  const type = unreleased ? 'unreleased' : 'released';
+  const changelog = await changelogJson(pkg, { type });
+  const changelogPath = join(pkg.dir, filename);
+  log(type, 'path:', changelogPath);
+  writeFileSync(changelogPath, JSON.stringify(changelog, null, '  '), 'utf8');
 };
 
 export const writeNextChangelogJson = async packagesDir =>
-  writeChangelogJson(packagesDir, NEXT_CHANGELOG, 'unreleased');
+  writeChangelogJson(packagesDir, true);
 
 export const writeReleasedChangelogJson = async packagesDir =>
-  writeChangelogJson(packagesDir, CHANGELOG, 'released');
+  writeChangelogJson(packagesDir, false);
 
 export const rmChangelogJson = async packagesDir => {
   const packages = getPackages(packagesDir);

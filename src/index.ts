@@ -5,7 +5,9 @@ export {
   writeReleasedChangelogJson,
   rmChangelogJson,
   getPackages,
-  changelogJson
+  changelogJson,
+  writeChangelogJsonForPackage,
+  getPackage
 } from './changelog';
 export { deployToNow } from './deploy-to-now';
 
