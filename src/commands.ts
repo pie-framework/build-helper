@@ -131,7 +131,7 @@ export class Commands {
         '--canary',
         '--preid next',
         '--dist-tag next',
-        '--include-merged-tag',
+        '--include-merged-tags',
         /**
          * Lerna only checks the last commit to detect changes, so it misses any historicaly changes since
          * the last tag. Ideally we wouldn't force-publish but just get it to find these changes correctly?
