@@ -2,6 +2,7 @@ import { deployToNow } from './deploy-to-now';
 import { execPromise } from './exec';
 import {
   rmChangelogJson,
+  rmNextChangelogJson,
   writeNextChangelogJson,
   writeReleasedChangelogJson
 } from './changelog';
@@ -84,9 +85,10 @@ export class Commands {
     if (this.args.next) {
       log('[beforePublish] dir:', dir);
       await writeNextChangelogJson(dir);
+    } else {
+      await rmNextChangelogJson(dir);
     }
 
-    await rmChangelogJson(dir);
     await writeReleasedChangelogJson(dir);
   }
 
