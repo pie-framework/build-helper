@@ -4,6 +4,7 @@ import { execSync } from 'child_process';
 import { join, basename } from 'path';
 import { getPackages, writeChangelogJsonForPackage } from './changelog';
 import { series } from './series';
+import { parseGitStatus } from './git-helper';
 const { resolve, relative } = require('path');
 const debug = require('debug');
 const log = debug('build-helper:commands');
@@ -12,17 +13,6 @@ const cmdLog = debug('build-helper:commands:cmd');
 const invariant = require('invariant');
 const bin = (root, n) => resolve(root, 'node_modules/.bin', n);
 const root = (root, n) => resolve(root, n);
-
-const gitStatus = (shortResult: string): { status: string; path: string }[] => {
-  const lines = shortResult.split('\n');
-
-  return lines
-    .map(l => {
-      const [status, path] = l.trim().split(' ');
-      return { status, path };
-    })
-    .filter(({ status, path }) => status !== '');
-};
 
 const getCurrentBranch = () =>
   execSync(`git rev-parse --abbrev-ref HEAD`)
@@ -65,10 +55,7 @@ export class Commands {
     return execPromise(cmd, { stdio: 'inherit', ...opts });
   }
 
-  async commit(
-    files: string[],
-    msg: string
-  ): Promise<Buffer | string | undefined> {
+  async commit(files: string[], msg: string): Promise<(Buffer | string)[]> {
     const result = await this.runCmd(`git status -s`, {
       cwd: this.projectRoot
     });
@@ -77,7 +64,8 @@ export class Commands {
       return;
     }
 
-    const st = gitStatus(result.toString());
+    const st = parseGitStatus(result.toString());
+
     log('[commit] st: ', st);
     const paths = files
       .map(f => `${relative(this.projectRoot, f)}`)
@@ -89,9 +77,12 @@ export class Commands {
 
     const pathString = paths.join(' ');
     log('[commit] path string:', pathString);
-    return this.runCmd(`git commit ${pathString} -m "${msg}"`, {
-      cwd: this.projectRoot
-    });
+    return this.runCmds(
+      [`git add ${pathString}`, `git commit ${pathString} -m "${msg}"`],
+      {
+        cwd: this.projectRoot
+      }
+    );
   }
 
   runCmds(
