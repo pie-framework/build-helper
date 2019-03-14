@@ -70,6 +70,7 @@ export const writeChangelogJsonForPackage = async (
   const changelogPath = join(pkg.dir, filename);
   log(type, 'path:', changelogPath);
   writeFileSync(changelogPath, JSON.stringify(changelog, null, '  '), 'utf8');
+  return changelogPath;
 };
 
 export const writeNextChangelogJson = async packagesDir =>
@@ -109,6 +110,22 @@ const getTagList = (hash: string): string[] => {
   tags = tags.startsWith(`"`) ? tags.substring(1) : tags;
   tags = tags.endsWith(`"`) ? tags.substring(0, tags.length - 1) : tags;
   return tags.split('\n').filter(s => s && s !== '');
+};
+
+export const mergeChangelogs = (
+  existing: { hash: string }[],
+  update: { hash: string }[]
+): { hash: string }[] => {
+  const out = [...existing];
+
+  update.forEach(c => {
+    const hasAlready = out.some(e => e.hash === c.hash);
+    if (!hasAlready) {
+      out.push(c);
+    }
+  });
+
+  return out;
 };
 
 export const changelogJson = async (
@@ -180,10 +197,12 @@ export const changelogJson = async (
 
   if (options.type === 'released') {
     const tagged = out.filter(d => d.isTagged);
-    return tagged.concat(existingChangelog || []);
+    return mergeChangelogs(existingChangelog || [], tagged);
+    // return tagged.concat(existingChangelog || []);
   } else if (options.type === 'unreleased') {
     return out.filter(d => !d.isTagged);
   } else {
-    return out.concat(existingChangelog || []);
+    // return out.concat(existingChangelog || []);
+    return mergeChangelogs(existingChangelog || [], out);
   }
 };

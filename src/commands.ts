@@ -1,11 +1,6 @@
 import { deployToNow } from './deploy-to-now';
 import { execPromise } from './exec';
-import {
-  rmChangelogJson,
-  rmNextChangelogJson,
-  writeNextChangelogJson,
-  writeReleasedChangelogJson
-} from './changelog';
+import { execSync } from 'child_process';
 const { resolve, relative } = require('path');
 const debug = require('debug');
 const log = debug('build-helper:commands');
@@ -14,6 +9,22 @@ const cmdLog = debug('build-helper:commands:cmd');
 const invariant = require('invariant');
 const bin = (root, n) => resolve(root, 'node_modules/.bin', n);
 const root = (root, n) => resolve(root, n);
+
+const gitStatus = (shortResult: string): { status: string; path: string }[] => {
+  const lines = shortResult.split('\n');
+
+  return lines
+    .map(l => {
+      const [status, path] = l.trim().split(' ');
+      return { status, path };
+    })
+    .filter(({ status, path }) => status !== '');
+};
+
+const getCurrentBranch = () =>
+  execSync(`git rev-parse --abbrev-ref HEAD`)
+    .toString()
+    .trim();
 
 /**
  * A utility class to help building pie monorepos.
@@ -51,7 +62,10 @@ export class Commands {
     return execPromise(cmd, { stdio: 'inherit', ...opts });
   }
 
-  async commit(dir: string, msg: string): Promise<Buffer | string | undefined> {
+  async commit(
+    files: string[],
+    msg: string
+  ): Promise<Buffer | string | undefined> {
     const result = await this.runCmd(`git status -s`, {
       cwd: this.projectRoot
     });
@@ -60,10 +74,21 @@ export class Commands {
       return;
     }
 
-    return this.runCmd(
-      `git commit ./${relative(this.projectRoot, dir)} -m "${msg}"`,
-      { cwd: this.projectRoot }
-    );
+    const st = gitStatus(result.toString());
+    log('[commit] st: ', st);
+    const paths = files
+      .map(f => `${relative(this.projectRoot, f)}`)
+      .filter(p => st.some(s => s.path === p));
+
+    if (paths.length === 0) {
+      return;
+    }
+
+    const pathString = paths.join(' ');
+    log('[commit] path string:', pathString);
+    return this.runCmd(`git commit ${pathString} -m "${msg}"`, {
+      cwd: this.projectRoot
+    });
   }
 
   runCmds(
@@ -73,7 +98,7 @@ export class Commands {
     return this.series(cmds, cmd => this.runCmd(cmd, opts));
   }
 
-  private series(cmds: string[], fn: (cmd: string) => Promise<any>) {
+  series(cmds: string[], fn: (cmd: string) => Promise<any>) {
     return cmds.reduce((p, cmd) => {
       return p
         .then(() => fn(cmd))
@@ -177,6 +202,8 @@ export class Commands {
     if (!this.args.skipPublishHooks) {
       await this.afterPublish();
     }
+    const branchToPush = TRAVIS ? TRAVIS_BRANCH : getCurrentBranch();
+    await this.runCmd(`git push origin ${branchToPush}`);
   }
 
   async build() {

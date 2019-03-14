@@ -9,6 +9,9 @@ export {
   writeChangelogJsonForPackage,
   getPackage
 } from './changelog';
+
+export { series } from './series';
+
 export { deployToNow } from './deploy-to-now';
 
 export { processFix, watch };
