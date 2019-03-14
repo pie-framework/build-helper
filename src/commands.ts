@@ -14,6 +14,26 @@ const invariant = require('invariant');
 const bin = (root, n) => resolve(root, 'node_modules/.bin', n);
 const root = (root, n) => resolve(root, n);
 
+type CiVars = {
+  branch: string;
+  repo: string;
+};
+
+const getCiVars = (): CiVars | undefined => {
+  if (process.env.TRAVIS) {
+    return {
+      branch: process.env.TRAVIS_BRANCH,
+      repo: process.env.TRAVIS_REPO_SLUG
+    };
+  }
+  if (process.env.CI) {
+    return {
+      branch: process.env.CIRCLE_BRANCH,
+      repo: process.env.CIRCLE_PROJECT_REPONAME
+    };
+  }
+};
+
 const getCurrentBranch = () =>
   execSync(`git rev-parse --abbrev-ref HEAD`)
     .toString()
@@ -148,24 +168,21 @@ export class Commands {
   async release() {
     cmdLog('----> release', this.args);
 
-    const {
-      TRAVIS,
-      TRAVIS_BRANCH,
-      GITHUB_TOKEN,
-      TRAVIS_REPO_SLUG
-    } = process.env;
+    const { GITHUB_TOKEN } = process.env;
 
-    if (TRAVIS) {
-      invariant(TRAVIS_BRANCH, 'TRAVIS_BRANCH env var must be defined');
+    const ciVars = getCiVars();
+
+    if (ciVars) {
       invariant(GITHUB_TOKEN, 'GITHUB_TOKEN env var must be defined');
-      invariant(TRAVIS_REPO_SLUG, 'TRAVIS_REPO_SLUG env var must be defined');
 
       log(
         '-----> running in TRAVIS - checkout the branch (detached head doesnt work with lerna)'
       );
       await this.runCmds([
-        `git remote set-url origin https://${GITHUB_TOKEN}@github.com/${TRAVIS_REPO_SLUG}.git`,
-        `git checkout ${TRAVIS_BRANCH}`,
+        `git remote set-url origin https://${GITHUB_TOKEN}@github.com/${
+          ciVars.repo
+        }.git`,
+        `git checkout ${ciVars.branch}`,
         'git rev-parse --short HEAD'
       ]);
 
@@ -217,7 +234,7 @@ export class Commands {
     if (!this.args.skipPublishHooks) {
       await this.afterPublish();
     }
-    const branchToPush = TRAVIS ? TRAVIS_BRANCH : getCurrentBranch();
+    const branchToPush = ciVars ? ciVars.branch : getCurrentBranch();
     await this.runCmd(`git push origin ${branchToPush}`);
   }
 
