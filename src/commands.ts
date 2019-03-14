@@ -29,7 +29,9 @@ const getCiVars = (): CiVars | undefined => {
   if (process.env.CI) {
     return {
       branch: process.env.CIRCLE_BRANCH,
-      repo: process.env.CIRCLE_PROJECT_REPONAME
+      repo: `${process.env.CIRCLE_PROJECT_USERNAME}/${
+        process.env.CIRCLE_PROJECT_REPONAME
+      }`
     };
   }
 };
