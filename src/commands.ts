@@ -95,24 +95,14 @@ export class Commands {
     return d && d.toString && d.toString() === '';
   }
 
-  async beforePublish(): Promise<any> {
-    const dir = resolve(this.projectRoot, 'packages');
-    if (this.args.next) {
-      log('[beforePublish] dir:', dir);
-      await writeNextChangelogJson(dir);
-    } else {
-      await rmNextChangelogJson(dir);
-    }
-
-    await writeReleasedChangelogJson(dir);
-
-    await this.runCmd('git add .', { cwd: this.projectRoot });
-    await this.commit(this.projectRoot, '[travis skip] update changelogs');
+  /** Before lerna publish */
+  beforePublish(): Promise<any> {
+    return Promise.resolve();
   }
 
+  /** After lerna publish */
   afterPublish(): Promise<any> {
-    const dir = resolve(this.projectRoot, 'packages');
-    return rmChangelogJson(dir);
+    return Promise.resolve();
   }
 
   async release() {
