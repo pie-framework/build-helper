@@ -1,6 +1,9 @@
 import { deployToNow } from './deploy-to-now';
 import { execPromise } from './exec';
 import { execSync } from 'child_process';
+import { join, basename } from 'path';
+import { getPackages, writeChangelogJsonForPackage } from './changelog';
+import { series } from './series';
 const { resolve, relative } = require('path');
 const debug = require('debug');
 const log = debug('build-helper:commands');
@@ -128,6 +131,27 @@ export class Commands {
   /** After lerna publish */
   afterPublish(): Promise<any> {
     return Promise.resolve();
+  }
+
+  /** called by each package in prepack */
+  changelog() {
+    const packagesDir = join(this.projectRoot, 'packages');
+    const allPackages = getPackages(packagesDir);
+    const packages = this.args.scope
+      ? allPackages.filter(p => basename(p.dir) === this.args.scope)
+      : allPackages;
+
+    return series(
+      packages.map(pkg => async () => {
+        // This function is called from prepack - so we don't know if it's next or not
+        const clPath = await writeChangelogJsonForPackage(pkg, false);
+        await writeChangelogJsonForPackage(pkg, true);
+        await this.commit(
+          [clPath],
+          `[travis skip] update changelog.json for ${pkg.pkg.name}`
+        );
+      })
+    );
   }
 
   async release() {
