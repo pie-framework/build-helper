@@ -269,7 +269,8 @@ export class Commands {
   }
 
   test() {
-    return this.runCmds([`${this.p.jest}`]);
+    const workerCount = this.args.testWorkers || 1;
+    return this.runCmds([`${this.p.jest} -w ${workerCount}`]);
   }
 
   execute() {
