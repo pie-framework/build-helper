@@ -146,25 +146,25 @@ export class Commands {
     return Promise.resolve();
   }
 
-  /** called by each package in prepack */
-  changelog() {
+  /** called by root package in prepack */
+  async changelog() {
     const packagesDir = join(this.projectRoot, 'packages');
     const allPackages = getPackages(packagesDir);
     const packages = this.args.scope
       ? allPackages.filter(p => basename(p.dir) === this.args.scope)
       : allPackages;
 
-    return series(
+    const paths = await series(
       packages.map(pkg => async () => {
         // This function is called from prepack - so we don't know if it's next or not
         const clPath = await writeChangelogJsonForPackage(pkg, false);
         await writeChangelogJsonForPackage(pkg, true);
-        await this.commit(
-          [clPath],
-          `[travis skip] update changelog.json for ${pkg.pkg.name}`
-        );
+        return clPath;
       })
     );
+
+    await this.commit(paths, `[ci skip] update changelog.json`);
+    return paths;
   }
 
   async release() {
