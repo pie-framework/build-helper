@@ -1,19 +1,17 @@
-import { processFix } from './process-fix';
-import { watch } from './babel-multiple';
+export { processFix } from './process-fix';
+export { watch } from './babel-multiple';
 export {
   writeNextChangelogJson,
   writeReleasedChangelogJson,
   rmChangelogJson,
-  getPackages,
   changelogJson,
-  writeChangelogJsonForPackage,
-  getPackage
+  writeChangelogJsonForPackage
 } from './changelog';
+
+export { getPackages, getPackage, PkgAndDir } from './pkg';
 
 export { series } from './series';
 
 export { deployToNow } from './deploy-to-now';
-
-export { processFix, watch };
 
 export { Commands } from './commands';

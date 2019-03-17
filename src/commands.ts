@@ -2,9 +2,10 @@ import { deployToNow } from './deploy-to-now';
 import { execPromise } from './exec';
 import { execSync } from 'child_process';
 import { join, basename } from 'path';
-import { getPackages, writeChangelogJsonForPackage } from './changelog';
+import { writeChangelogJsonForPackage } from './changelog';
 import { series } from './series';
 import { parseGitStatus } from './git-helper';
+import { PkgAndDir } from './pkg';
 const { resolve, relative } = require('path');
 const debug = require('debug');
 const log = debug('build-helper:commands');
@@ -47,7 +48,11 @@ const getCurrentBranch = () =>
 export class Commands {
   private p: any;
   readonly dryRun: boolean;
-  constructor(private projectRoot: string, private args: any) {
+  constructor(
+    private projectRoot: string,
+    private args: any,
+    readonly getPackages: (dir: string) => PkgAndDir[]
+  ) {
     this.dryRun = !!args.dryRun || process.env.DRY_RUN === 'true';
     this.p = {
       lerna: bin(this.projectRoot, 'lerna'),
@@ -149,7 +154,7 @@ export class Commands {
   /** called by root package in prepack */
   async changelog() {
     const packagesDir = join(this.projectRoot, 'packages');
-    const allPackages = getPackages(packagesDir);
+    const allPackages = this.getPackages(packagesDir);
     const packages = this.args.scope
       ? allPackages.filter(p => basename(p.dir) === this.args.scope)
       : allPackages;

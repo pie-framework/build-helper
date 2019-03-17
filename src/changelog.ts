@@ -13,22 +13,12 @@ import * as _ from 'lodash';
 import { sync as syncParser } from 'conventional-commits-parser';
 import * as gitRawCommits from 'git-raw-commits';
 import * as mergeConfig from 'conventional-changelog-core/lib/merge-config';
+import * as pkg from './pkg';
 
 const log = debug('build-helper:changelog');
 
 const NEXT_CHANGELOG = 'NEXT.CHANGELOG.json';
 const CHANGELOG = 'CHANGELOG.json';
-
-export const getPackages = (root: string): PkgAndDir[] => {
-  const pkgs = readdirSync(root);
-  return pkgs.map(p => getPackage(join(root, p)));
-};
-export type PkgAndDir = { dir: string; pkg: any };
-
-export const getPackage = (dir: string): PkgAndDir => ({
-  dir,
-  pkg: readJsonSync(join(dir, 'package.json'))
-});
 
 class ArrayBufferWritable extends Writable {
   private parts: Buffer[];
@@ -49,9 +39,10 @@ class ArrayBufferWritable extends Writable {
 
 export const writeChangelogJson = async (
   packagesDir: string,
-  unreleased: boolean
+  unreleased: boolean,
+  getPackages: (dir: string) => pkg.PkgAndDir[] = pkg.getPackages
 ) => {
-  const packages: PkgAndDir[] = getPackages(packagesDir);
+  const packages: pkg.PkgAndDir[] = getPackages(packagesDir);
 
   const promises = packages.map(p =>
     writeChangelogJsonForPackage(p, unreleased)
@@ -60,7 +51,7 @@ export const writeChangelogJson = async (
 };
 
 export const writeChangelogJsonForPackage = async (
-  pkg: PkgAndDir,
+  pkg: pkg.PkgAndDir,
   unreleased: boolean
 ) => {
   log('changelog for : ', pkg.dir);
@@ -79,12 +70,18 @@ export const writeNextChangelogJson = async packagesDir =>
 export const writeReleasedChangelogJson = async packagesDir =>
   writeChangelogJson(packagesDir, false);
 
-export const rmChangelogJson = async packagesDir => {
+export const rmChangelogJson = async (
+  packagesDir,
+  getPackages: (dir: string) => pkg.PkgAndDir[]
+) => {
   const packages = getPackages(packagesDir);
   return Promise.all(packages.map(p => remove(join(p.dir, CHANGELOG))));
 };
 
-export const rmNextChangelogJson = async packagesDir => {
+export const rmNextChangelogJson = async (
+  packagesDir: string,
+  getPackages: (dir: string) => pkg.PkgAndDir[]
+) => {
   const packages = getPackages(packagesDir);
   return Promise.all(packages.map(p => remove(join(p.dir, NEXT_CHANGELOG))));
 };
