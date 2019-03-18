@@ -180,7 +180,7 @@ export const changelogJson = async (
         // log(data.hash, 'list: ', list.length, list);
         data.isTagged = list.length > 0;
         // data.tagList = list;
-        data.earliestTag = list.length >= 1 ? list[0] : undefined;
+        data.tag = list.length >= 1 ? list[0] : undefined;
         delete data.mentions;
         // delete data.notes;
         delete data.references;
