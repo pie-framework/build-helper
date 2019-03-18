@@ -18,21 +18,27 @@ const root = (root, n) => resolve(root, n);
 type CiVars = {
   branch: string;
   repo: string;
+  username: string;
+  email: string;
 };
 
 const getCiVars = (): CiVars | undefined => {
   if (process.env.TRAVIS) {
     return {
       branch: process.env.TRAVIS_BRANCH,
-      repo: process.env.TRAVIS_REPO_SLUG
+      email: 'travis@travis-ci.org',
+      repo: process.env.TRAVIS_REPO_SLUG,
+      username: 'travis'
     };
   }
   if (process.env.CI) {
     return {
       branch: process.env.CIRCLE_BRANCH,
+      email: 'circleci@circleci.com',
       repo: `${process.env.CIRCLE_PROJECT_USERNAME}/${
         process.env.CIRCLE_PROJECT_REPONAME
-      }`
+      }`,
+      username: 'circleci'
     };
   }
 };
@@ -189,6 +195,8 @@ export class Commands {
         `git remote set-url origin https://${GITHUB_TOKEN}@github.com/${
           ciVars.repo
         }.git`,
+        `git config user.name "${ciVars.username}"`,
+        `git config user.email "${ciVars.email}"`,
         `git checkout ${ciVars.branch}`,
         'git rev-parse --short HEAD'
       ]);
