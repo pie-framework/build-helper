@@ -195,10 +195,10 @@ export class Commands {
         `git remote set-url origin https://${GITHUB_TOKEN}@github.com/${
           ciVars.repo
         }.git`,
-        `git config user.name "${ciVars.username}"`,
-        `git config user.email "${ciVars.email}"`,
         `git checkout ${ciVars.branch}`,
-        'git rev-parse --short HEAD'
+        'git rev-parse --short HEAD',
+        `git config user.name "${ciVars.username}"`,
+        `git config user.email "${ciVars.email}"`
       ]);
 
       await this.runCmds([`git status`]);
