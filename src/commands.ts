@@ -5,7 +5,7 @@ import { join, basename } from 'path';
 import { writeChangelogJsonForPackage } from './changelog';
 import { series } from './series';
 import { parseGitStatus } from './git-helper';
-import { PkgAndDir } from './pkg';
+import { PkgAndDir, getPackages as defaultGetPackages } from './pkg';
 const { resolve, relative } = require('path');
 const debug = require('debug');
 const log = debug('build-helper:commands');
@@ -51,7 +51,7 @@ export class Commands {
   constructor(
     private projectRoot: string,
     private args: any,
-    readonly getPackages: (dir: string) => PkgAndDir[]
+    readonly getPackages: (dir: string) => PkgAndDir[] = defaultGetPackages
   ) {
     this.dryRun = !!args.dryRun || process.env.DRY_RUN === 'true';
     this.p = {
