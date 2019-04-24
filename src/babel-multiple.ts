@@ -1,7 +1,7 @@
 import { spawn, ChildProcess } from 'child_process';
 import * as debug from 'debug';
 
-const log = debug('@pie-ui:scripts:babel-multiple');
+const log = debug('pie-framework:scripts:babel-multiple');
 
 export class Processes {
   constructor(
@@ -48,9 +48,10 @@ export const watch = (
       '--ignore',
       'node_modules',
       '--sourcemaps',
-      'inline'
+      'inline',
+      '--verbose'
     ];
-    log('start: ', t.src, t.target);
+    log('start: ', t.src, t.target, args.join(' '));
 
     return {
       src: t.src,
