@@ -2,7 +2,7 @@ import { join } from 'path';
 import { readdirSync, readJsonSync } from 'fs-extra';
 
 export const getPackages = (root: string): PkgAndDir[] => {
-  const pkgs = readdirSync(root);
+  const pkgs = readdirSync(root).filter(n => !n.startsWith('.'));
   return pkgs.map(p => getPackage(join(root, p)));
 };
 
