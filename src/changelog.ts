@@ -172,7 +172,7 @@ export const changelogJson = async (
 
   const out = chunks
     .map(b => syncParser(b.toString(), merged.parserOpts))
-    .filter(d => d.type)
+    .filter(d => d.type === 'feat' || d.type === 'fix')
     .map(data => {
       try {
         const tagList = getTagList(data.hash);
