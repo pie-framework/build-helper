@@ -5,7 +5,7 @@ import {
   readdirSync,
   readJsonSync,
   writeFileSync,
-  remove
+  remove,
 } from 'fs-extra';
 import { execSync } from 'child_process';
 import { Writable } from 'stream';
@@ -20,7 +20,7 @@ const log = debug('build-helper:changelog');
 const NEXT_CHANGELOG = 'NEXT.CHANGELOG.json';
 const CHANGELOG = 'CHANGELOG.json';
 
-class ArrayBufferWritable extends Writable {
+export class ArrayBufferWritable extends Writable {
   private parts: Buffer[];
   constructor(readonly done: (e?: Error, data?: Buffer[]) => void) {
     super();
@@ -44,7 +44,7 @@ export const writeChangelogJson = async (
 ) => {
   const packages: pkg.PkgAndDir[] = getPackages(packagesDir);
 
-  const promises = packages.map(p =>
+  const promises = packages.map((p) =>
     writeChangelogJsonForPackage(p, unreleased)
   );
   return Promise.all(promises);
@@ -64,10 +64,10 @@ export const writeChangelogJsonForPackage = async (
   return changelogPath;
 };
 
-export const writeNextChangelogJson = async packagesDir =>
+export const writeNextChangelogJson = async (packagesDir) =>
   writeChangelogJson(packagesDir, true);
 
-export const writeReleasedChangelogJson = async packagesDir =>
+export const writeReleasedChangelogJson = async (packagesDir) =>
   writeChangelogJson(packagesDir, false);
 
 export const rmChangelogJson = async (
@@ -75,7 +75,7 @@ export const rmChangelogJson = async (
   getPackages: (dir: string) => pkg.PkgAndDir[]
 ) => {
   const packages = getPackages(packagesDir);
-  return Promise.all(packages.map(p => remove(join(p.dir, CHANGELOG))));
+  return Promise.all(packages.map((p) => remove(join(p.dir, CHANGELOG))));
 };
 
 export const rmNextChangelogJson = async (
@@ -83,11 +83,11 @@ export const rmNextChangelogJson = async (
   getPackages: (dir: string) => pkg.PkgAndDir[]
 ) => {
   const packages = getPackages(packagesDir);
-  return Promise.all(packages.map(p => remove(join(p.dir, NEXT_CHANGELOG))));
+  return Promise.all(packages.map((p) => remove(join(p.dir, NEXT_CHANGELOG))));
 };
 
 const readExistingChangelog = (dir: string): Promise<any | undefined> =>
-  readJson(join(dir, CHANGELOG)).catch(e => undefined);
+  readJson(join(dir, CHANGELOG)).catch((e) => undefined);
 
 const getLatestHashFromExistingChangelog = (
   existingChangelog: any[]
@@ -100,13 +100,11 @@ const getLatestHashFromExistingChangelog = (
 };
 
 const getTagList = (hash: string): string[] => {
-  let tags = execSync(`git tag --contains ${hash}`)
-    .toString()
-    .trim();
+  let tags = execSync(`git tag --contains ${hash}`).toString().trim();
 
   tags = tags.startsWith(`"`) ? tags.substring(1) : tags;
   tags = tags.endsWith(`"`) ? tags.substring(0, tags.length - 1) : tags;
-  return tags.split('\n').filter(s => s && s !== '');
+  return tags.split('\n').filter((s) => s && s !== '');
 };
 
 export const mergeChangelogs = (
@@ -115,8 +113,8 @@ export const mergeChangelogs = (
 ): { hash: string }[] => {
   const out = [...existing];
 
-  update.forEach(c => {
-    const hasAlready = out.some(e => e.hash === c.hash);
+  update.forEach((c) => {
+    const hasAlready = out.some((e) => e.hash === c.hash);
     if (!hasAlready) {
       out.push(c);
     }
@@ -135,11 +133,11 @@ export const changelogJson = async (
   const options = {
     preset: 'angular',
     pkg: {
-      path: pk.dir
+      path: pk.dir,
     },
     lernaPackage: pk.pkg.name,
     releaseCount: 0,
-    ...opts
+    ...opts,
   };
 
   const existingChangelog = await readExistingChangelog(pk.dir);
@@ -150,7 +148,7 @@ export const changelogJson = async (
   const gitRawCommitsOpts = {
     path: pk.dir,
     merges: true,
-    from
+    from,
   };
 
   const context = undefined;
@@ -171,12 +169,12 @@ export const changelogJson = async (
   });
 
   const out = chunks
-    .map(b => syncParser(b.toString(), merged.parserOpts))
-    .filter(d => d.type === 'feat' || d.type === 'fix')
-    .map(data => {
+    .map((b) => syncParser(b.toString(), merged.parserOpts))
+    .filter((d) => d.type === 'feat' || d.type === 'fix')
+    .map((data) => {
       try {
         const tagList = getTagList(data.hash);
-        const list = tagList.filter(s => s.startsWith(`${pk.pkg.name}@`));
+        const list = tagList.filter((s) => s.startsWith(`${pk.pkg.name}@`));
         // log(data.hash, 'list: ', list.length, list);
         data.isTagged = list.length > 0;
         // data.tagList = list;
@@ -193,11 +191,11 @@ export const changelogJson = async (
     });
 
   if (options.type === 'released') {
-    const tagged = out.filter(d => d.isTagged);
+    const tagged = out.filter((d) => d.isTagged);
     return mergeChangelogs(existingChangelog || [], tagged);
     // return tagged.concat(existingChangelog || []);
   } else if (options.type === 'unreleased') {
-    return out.filter(d => !d.isTagged);
+    return out.filter((d) => !d.isTagged);
   } else {
     // return out.concat(existingChangelog || []);
     return mergeChangelogs(existingChangelog || [], out);
