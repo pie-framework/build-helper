@@ -68,10 +68,7 @@ const getChangelist = (
   latestVersion?: string
 ) => {
   const tagList = getTagsForPackage(repoRoot, pkg);
-  console.log(
-    'tagList',
-    tagList.map((t) => t.raw)
-  );
+
   if (latestVersion) {
     const index = tagList.findIndex((s) => s.raw === latestVersion);
     if (index < 0) {
@@ -167,6 +164,12 @@ export const publishFixToJira = async (
   const jira = new Jira(jiraOpts.host, jiraOpts.email, jiraOpts.apiToken);
 
   const project = await jira.getProject(jiraOpts.projectId);
+
+  if (!project || !project.id) {
+    console.log('opts', jiraOpts);
+    console.log('project', project);
+    throw new Error('project is missing id');
+  }
 
   const releaseVersion = await jira.findOrCreateVersion(
     project.id,

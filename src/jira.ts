@@ -17,10 +17,13 @@ export class Jira {
     });
   }
 
-  public getProject(projectId: string) {
-    return this.client.project.getProject({
+  public async getProject(projectId: string) {
+    log('[getProject] projectId:', projectId);
+    const result = await this.client.project.getProject({
       projectIdOrKey: projectId,
     });
+    log('[getProject]: id:', projectId, 'result:', result);
+    return result;
   }
 
   public async findOrCreateVersion(
