@@ -171,6 +171,8 @@ export const publishFixToJira = async (
     throw new Error('project is missing id');
   }
 
+  log('projectId: ', project.id);
+
   const releaseVersion = await jira.findOrCreateVersion(
     project.id,
     jiraFixVersion,

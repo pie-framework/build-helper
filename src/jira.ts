@@ -22,7 +22,7 @@ export class Jira {
     const result = await this.client.project.getProject({
       projectIdOrKey: projectId,
     });
-    log('[getProject]: id:', projectId, 'result:', result);
+    log('[getProject]: id:', projectId, result && result.id);
     return result;
   }
 
@@ -34,7 +34,9 @@ export class Jira {
     const remoteVersions = await this.client.project.getVersions({
       projectIdOrKey: projectId,
     });
-    log(`Looking for version with name '${name}'`);
+
+    log(`[findOrCreateVersion] name: ${name}, projectId:  ${projectId}`);
+
     const existing = _(remoteVersions).find((rv) => rv.name === name); //_.find<{ id: string }>(remoteVersions, { name });
     if (existing) {
       log(`Found existing release '${existing.id}'`);
