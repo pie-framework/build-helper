@@ -141,8 +141,8 @@ export const publishFixToJira = async (
   const version = opts.npm_package_version;
   const tag = opts.npm_config_tag;
 
-  if (tag !== 'latest' || tag !== 'next') {
-    console.log('only publishing for next and latest tags');
+  if (tag !== 'latest' && tag !== 'next') {
+    console.log('only publishing for next and latest tags, got tag: ', tag);
     return;
   }
 
