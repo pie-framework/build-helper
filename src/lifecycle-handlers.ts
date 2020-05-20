@@ -179,6 +179,10 @@ export const publishFixToJira = async (
     .uniq()
     .value();
 
+  if (!allKeys || allKeys.length === 0) {
+    return [];
+  }
+
   const jira = new Jira(jiraOpts.host, jiraOpts.email, jiraOpts.apiToken);
 
   const project = await jira.getProject(jiraOpts.projectId);
