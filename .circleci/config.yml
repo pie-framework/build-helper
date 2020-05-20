@@ -31,6 +31,10 @@ save_build_cache: &save_build_cache
   paths:
     - ~/repo/dist
 
+auth_npm: &auth_npm
+  name: 'set up npm auth'
+  command: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/repo
+
 restore_build_cache: &restore_build_cache
   keys:
     - build-v7-{{ .Branch }}-{{ .Revision }}
@@ -56,6 +60,7 @@ jobs:
   release:
     <<: *defaults
     steps:
+      - run: *auth_npm
       - restore_cache: *restore_src_cache
       - restore_cache: *restore_npm_cache
       - restore_cache: *restore_build_cache
