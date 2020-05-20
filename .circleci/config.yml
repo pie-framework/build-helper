@@ -79,4 +79,6 @@ workflows:
       - release:
           requires:
             - test
-          context: npm,github
+          contexts:
+            - npm
+            - github
