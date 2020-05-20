@@ -92,6 +92,7 @@ export class Jira {
     newVersionName: string,
     releaseVersionId: string,
     issueKey: string,
+    transitionId?: string,
     dryRun?: boolean
   ): Promise<void> {
     try {
@@ -100,19 +101,24 @@ export class Jira {
         log('dry run, stopping here.');
         return;
       }
+      const changes: any = {
+        update: {
+          fixVersions: [
+            {
+              add: { id: releaseVersionId },
+            },
+          ],
+        },
+        properties: [],
+      };
+
+      if (transitionId) {
+        changes.transition = { id: transitionId };
+      }
 
       await this.client.issue.editIssue({
         issueKey,
-        issue: {
-          update: {
-            fixVersions: [
-              {
-                add: { id: releaseVersionId },
-              },
-            ],
-          },
-          properties: [],
-        },
+        issue: changes,
       });
     } catch (err) {
       const allowedStatusCodes = [400, 404];

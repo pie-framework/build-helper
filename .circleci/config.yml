@@ -31,6 +31,10 @@ save_build_cache: &save_build_cache
   paths:
     - ~/repo/dist
 
+avoid_hosts_unkown_github: &avoid_hosts_unknown_github
+  name: Avoid hosts unknown for github
+  command: mkdir ~/.ssh/ && echo -e "Host github.com\n\tStrictHostKeyChecking no\n" > ~/.ssh/config
+
 auth_npm: &auth_npm
   name: 'set up npm auth'
   command: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/repo/.npmrc
@@ -61,6 +65,7 @@ jobs:
     <<: *defaults
     steps:
       - run: *auth_npm
+      - run: *avoid_hosts_unknown_github
       - restore_cache: *restore_src_cache
       - restore_cache: *restore_npm_cache
       - restore_cache: *restore_build_cache
