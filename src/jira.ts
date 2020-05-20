@@ -26,6 +26,34 @@ export class Jira {
     return result;
   }
 
+  public async findStatus(name: string): Promise<any> {
+    if (!name) {
+      return undefined;
+    }
+    const statuses = await this.client.status.getAllStatuses({
+      projectIdOrKey: 'JAT',
+    });
+
+    const filtered = statuses.filter(
+      (s) =>
+        s.name.toLowerCase() === name.toLowerCase() && s.scope === undefined
+    );
+    console.log('[findWorkflow]', filtered);
+
+    if (filtered.length === 0) {
+      console.error('cant find status with name', name);
+      return undefined;
+    }
+    if (filtered.length > 1) {
+      console.error('found multiple statuses with name', name);
+      return undefined;
+    }
+    // .map((w) => w.scope?.project)
+    // ); //.map((w) => w.name)
+    //);
+    return filtered[0];
+  }
+
   public async deleteVersions(projectId: string) {
     const remoteVersions = await this.client.project.getVersions({
       projectIdOrKey: projectId,
@@ -92,7 +120,7 @@ export class Jira {
     newVersionName: string,
     releaseVersionId: string,
     issueKey: string,
-    transitionId?: string,
+    newStatusId?: string,
     dryRun?: boolean
   ): Promise<void> {
     try {
@@ -112,8 +140,8 @@ export class Jira {
         properties: [],
       };
 
-      if (transitionId) {
-        changes.transition = { id: transitionId };
+      if (newStatusId) {
+        changes.transition = { id: newStatusId };
       }
 
       await this.client.issue.editIssue({

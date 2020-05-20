@@ -100,7 +100,7 @@ const getChangelist = (
 
 export const getFixVersion = (pkg: string, tag: string, version: string) => {
   // console.log('[getFixVersion] ', pkg, tag, version);
-  const v = tag === 'next' ? version.split('+')[0] : version;
+  const v = tag === 'next' ? `${version.split('-next')[0]}-next` : version;
   return `${pkg} ${v}`;
 };
 
@@ -213,6 +213,8 @@ export const publishFixToJira = async (
   );
 
   log('fix version: ', jiraFixVersion, 'all keys: ', allKeys);
+
+  const status = await jira.findStatus(opts.tagToStatus[tag]);
   return Promise.all(
     allKeys.map(async (k) => {
       // const v = `${pkg} ${version}`;
@@ -220,6 +222,7 @@ export const publishFixToJira = async (
         jiraFixVersion,
         releaseVersion.id,
         k,
+        status?.id,
         opts.dryRun
       );
     })
