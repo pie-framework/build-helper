@@ -1,7 +1,7 @@
 version: 2
 defaults: &defaults
   docker:
-    - image: circleci/node:11.10.0-browsers
+    - image: circleci/node:latest
   working_directory: ~/repo
 
 restore_src_cache: &restore_src_cache
@@ -46,22 +46,12 @@ jobs:
       - run: npm install
       - save_cache: *save_npm_cache
 
-  build:
-    <<: *defaults
-    steps:
-      - restore_cache: *restore_src_cache
-      - restore_cache: *restore_npm_cache
-      - run:
-          name: build
-          command: bash circleBuild.sh
-      - save_cache: *save_build_cache
-
   test:
     <<: *defaults
     steps:
       - restore_cache: *restore_src_cache
       - restore_cache: *restore_npm_cache
-      - run: yarn test
+      - run: npm test
 
   release:
     <<: *defaults
@@ -71,19 +61,16 @@ jobs:
       - restore_cache: *restore_build_cache
       - run:
           name: release
-          command: yarn release
+          command: npm run release
 
 workflows:
   version: 2
   main:
     jobs:
       - install
-      - build:
-          requires:
-            - install
       - test:
           requires:
-            - build
+            - install
       - release:
           requires:
             - test

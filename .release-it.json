@@ -1,6 +1,4 @@
 {
-  "increment": "conventional:angular",
-  "changelogCommand": "./node_modules/.bin/conventional-changelog -p angular | tail -n +3",
   "safeBump": false,
   "github": {
     "release": true,
@@ -8,5 +6,11 @@
   },
   "git": {
     "requireBranch": "master"
+  },
+  "plugins": {
+    "@release-it/conventional-changelog": {
+      "preset": "angular",
+      "infile": "CHANGELOG.md"
+    }
   }
 }
