@@ -8,12 +8,20 @@ import { Jira } from './jira';
 const log = console.log.bind(console, '[lifecycle-handlers]');
 
 const getCommits = (
+  packageDir: string,
   repoRoot: string,
   from: string,
   to: string
 ): Promise<string[]> => {
-  console.log('[getChanges] from:', from, 'to: ', to);
-  const o = gitRawCommits({ from, to }, { cwd: repoRoot });
+  console.log(
+    '[getChanges] from:',
+    from,
+    'to: ',
+    to,
+    'packageDir:',
+    packageDir
+  );
+  const o = gitRawCommits({ from, to, path: packageDir }, { cwd: repoRoot });
 
   return new Promise((resolve, reject) => {
     const ws = new ArrayBufferWritable((err, s) => {
@@ -63,6 +71,7 @@ export type JiraOpts = {
 };
 
 const getChangelist = (
+  packageDir: string,
   repoRoot: string,
   pkg: string,
   latestVersion?: string
@@ -77,6 +86,7 @@ const getChangelist = (
 
     const previousVersion = tagList[index + 1].raw;
     return getCommits(
+      packageDir,
       repoRoot,
       `${pkg}@${previousVersion}`,
       `${pkg}@${latestVersion}`
@@ -85,7 +95,7 @@ const getChangelist = (
 
   // else get changes from last version released..HEAD
   const lastVersion = tagList[0].raw;
-  return getCommits(repoRoot, `${pkg}@${lastVersion}`, 'HEAD');
+  return getCommits(packageDir, repoRoot, `${pkg}@${lastVersion}`, 'HEAD');
 };
 
 const getFixVersion = (pkg: string, tag: string, version: string) => {
@@ -122,6 +132,12 @@ const toJiraCommit = (prefixes: string[], c: string): Jc | undefined => {
   return undefined;
 };
 
+export const deleteAllVersions = async (jiraOpts: JiraOpts) => {
+  const jira = new Jira(jiraOpts.host, jiraOpts.email, jiraOpts.apiToken);
+  const project = await jira.getProject(jiraOpts.projectId);
+  await jira.deleteVersions(project.id);
+};
+
 /**
  * read the commit log and pick up any commits that tag jira ids,
  * set the package next/latest version as the fix version on the ticket.
@@ -130,6 +146,7 @@ const toJiraCommit = (prefixes: string[], c: string): Jc | undefined => {
  * @param opts
  */
 export const publishFixToJira = async (
+  packageDir: string,
   repoRoot: string,
   jiraOpts: JiraOpts,
   opts: any
@@ -144,6 +161,7 @@ export const publishFixToJira = async (
   }
 
   const changes = await getChangelist(
+    packageDir,
     repoRoot,
     pkg,
     tag === 'latest' && version
