@@ -5,7 +5,7 @@ const { execSync } = require('child_process');
 const branch = execSync('git rev-parse --abbrev-ref HEAD').toString();
 
 if (branch === 'master') {
-  execSync('./node_modules/.bin/release-it', { stdio: 'inherit' });
+  execSync('./node_modules/.bin/release-it --ci', { stdio: 'inherit' });
 } else {
   console.log('we only release on master');
 }
