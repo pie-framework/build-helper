@@ -2,8 +2,9 @@
 
 const { execSync } = require('child_process');
 
-const branch = execSync('git rev-parse --abbrev-ref HEAD').toString();
+const branch = execSync('git rev-parse --abbrev-ref HEAD').toString().trim();
 
+console.log('branch:', branch);
 if (branch === 'master') {
   execSync('./node_modules/.bin/release-it --ci', { stdio: 'inherit' });
 } else {
