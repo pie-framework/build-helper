@@ -37,7 +37,8 @@
   },
   "scripts": {
     "build": "rm -fr lib && ./node_modules/.bin/tsc",
-    "release": "npm run build && release-it"
+    "release": "npm run build && release-it",
+    "test": "jest"
   },
   "author": "",
   "license": "ISC"
