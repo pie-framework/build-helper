@@ -26,6 +26,29 @@ export class Jira {
     return result;
   }
 
+  public async deleteVersions(projectId: string) {
+    const remoteVersions = await this.client.project.getVersions({
+      projectIdOrKey: projectId,
+    });
+
+    console.log('remoteVersions', remoteVersions);
+    const pe = remoteVersions.filter((rv) =>
+      rv.name.startsWith('@pie-element')
+    );
+
+    console.log('pe:', pe);
+    await Promise.all(
+      pe.map(async (p) => {
+        console.log('id?', p.id);
+        const result = await this.client.version.deleteVersion({
+          versionId: p.id,
+        });
+        console.log('result:', result);
+        return result;
+      })
+    );
+  }
+
   public async findOrCreateVersion(
     projectId: number,
     name: string,
