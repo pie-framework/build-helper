@@ -227,7 +227,7 @@ export const publishFixToJira = async (
       const transitionName = opts.tagToStatus[tag];
       const changed = await jira.changeIssueStatus(k, transitionName);
       if (changed) {
-        console.log('status has been transitioned to: ', transitionName);
+        console.log(k, 'status has been transitioned to: ', transitionName);
       }
     })
   );
