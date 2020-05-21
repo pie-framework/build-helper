@@ -1,3 +1,15 @@
+# [5.2.0](https://github.com/pie-framework/build-helper/compare/5.1.1...5.2.0) (2020-05-21)
+
+
+### Bug Fixes
+
+* add 'v' to fix version name ([c5fc246](https://github.com/pie-framework/build-helper/commit/c5fc246321ce92ad84d591a5af7917f1e719114a))
+
+
+### Features
+
+* add opts.fixVersion function ([6a2e60b](https://github.com/pie-framework/build-helper/commit/6a2e60b85cbe006f4c2c721ee12b056861e62884))
+
 ## [5.1.1](https://github.com/pie-framework/build-helper/compare/5.1.0...5.1.1) (2020-05-21)
 
 
