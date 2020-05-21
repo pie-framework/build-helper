@@ -5,7 +5,8 @@
     "tokenRef": "GITHUB_TOKEN"
   },
   "git": {
-    "requireBranch": "master"
+    "requireBranch": "master",
+    "commitMessage": "[ci skip] Release ${version}"
   },
   "plugins": {
     "@release-it/conventional-changelog": {
