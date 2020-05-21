@@ -120,7 +120,6 @@ export class Jira {
     newVersionName: string,
     releaseVersionId: string,
     issueKey: string,
-    newStatusId?: string,
     dryRun?: boolean
   ): Promise<void> {
     try {
@@ -139,10 +138,6 @@ export class Jira {
         },
         properties: [],
       };
-
-      if (newStatusId) {
-        changes.transition = { id: newStatusId };
-      }
 
       await this.client.issue.editIssue({
         issueKey,
@@ -167,5 +162,31 @@ export class Jira {
         `Unable to update issue ${issueKey} statusCode: ${statusCode}`
       );
     }
+  }
+
+  public async changeIssueStatus(
+    issueKey: string,
+    name?: string
+  ): Promise<boolean> {
+    if (!name) {
+      return false;
+    }
+
+    const result = await this.client.issue.getTransitions({ issueKey });
+    const transition = (result.transitions || []).find(
+      (t) => t.name.toLowerCase() === name.toLowerCase()
+    );
+
+    if (!transition) {
+      console.warn('cant find a transition for name:', name);
+      return false;
+    }
+
+    const tr = await this.client.issue.transitionIssue({
+      issueKey,
+      transition: { id: transition.id },
+    });
+
+    return true;
   }
 }

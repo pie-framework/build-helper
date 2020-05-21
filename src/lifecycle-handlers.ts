@@ -214,7 +214,6 @@ export const publishFixToJira = async (
 
   log('fix version: ', jiraFixVersion, 'all keys: ', allKeys);
 
-  const status = await jira.findStatus(opts.tagToStatus[tag]);
   return Promise.all(
     allKeys.map(async (k) => {
       // const v = `${pkg} ${version}`;
@@ -222,9 +221,14 @@ export const publishFixToJira = async (
         jiraFixVersion,
         releaseVersion.id,
         k,
-        status?.id,
         opts.dryRun
       );
+
+      const transitionName = opts.tagToStatus[tag];
+      const changed = await jira.changeIssueStatus(k, transitionName);
+      if (changed) {
+        console.log('status has been transitioned to: ', transitionName);
+      }
     })
   );
 };
