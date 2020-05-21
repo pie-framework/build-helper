@@ -1,3 +1,10 @@
+## [5.1.1](https://github.com/pie-framework/build-helper/compare/5.1.0...5.1.1) (2020-05-21)
+
+
+### Bug Fixes
+
+* add ci skip ([480bcbd](https://github.com/pie-framework/build-helper/commit/480bcbdd4f62388d5e4db391eeb03797816d263f))
+
 # [5.1.0](https://github.com/pie-framework/build-helper/compare/5.0.2...5.1.0) (2020-05-21)
 
 
