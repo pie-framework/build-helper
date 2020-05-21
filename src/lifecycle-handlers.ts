@@ -101,7 +101,7 @@ const getChangelist = (
 export const getFixVersion = (pkg: string, tag: string, version: string) => {
   // console.log('[getFixVersion] ', pkg, tag, version);
   const v = tag === 'next' ? `${version.split('-next')[0]}-next` : version;
-  return `${pkg} ${v}`;
+  return `${pkg} v${v}`;
 };
 
 type Jc = {

@@ -20,8 +20,9 @@ describe('parseKey', () => {
 describe('getFixVersion', () => {
   it.each`
     input                     | expected
-    ${'1.0.0-next.1+hash'}    | ${'foo 1.0.0-next'}
-    ${'1.0.0-next.1111+hash'} | ${'foo 1.0.0-next'}
+    ${'1.0.0-next.1+hash'}    | ${'foo v1.0.0-next'}
+    ${'1.0.0-next.1111+hash'} | ${'foo v1.0.0-next'}
+    ${'1.0.0'}                | ${'foo v1.0.0'}
   `('$input => $expected', ({ input, expected }) => {
     const tag = input.includes('next') ? 'next' : 'latest';
     const result = getFixVersion('foo', tag, input);
