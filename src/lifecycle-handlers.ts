@@ -160,7 +160,19 @@ export const publishFixToJira = async (
   packageDir: string,
   repoRoot: string,
   jiraOpts: JiraOpts,
-  opts: any
+  opts: {
+    npm_package_name: string;
+    npm_package_version: string;
+    npm_config_tag: string;
+    fixVersion: (
+      fixVersion: string,
+      pkg: string,
+      tag: string,
+      version: string
+    ) => string;
+    tagToStatus: { [tag: string]: string };
+    dryRun?: boolean;
+  }
 ) => {
   const pkg = opts.npm_package_name;
   const version = opts.npm_package_version;
@@ -178,7 +190,10 @@ export const publishFixToJira = async (
     tag === 'latest' && version
   );
 
-  const jiraFixVersion = getFixVersion(pkg, tag, version);
+  const defaultFixVersion = getFixVersion(pkg, tag, version);
+  const fixVersion = opts.fixVersion
+    ? opts.fixVersion(defaultFixVersion, pkg, tag, version)
+    : defaultFixVersion;
 
   const jiraCommits: Jc[] = _.compact(
     changes.map((c) => toJiraCommit(jiraOpts.projectPrefixes, c))
@@ -208,17 +223,17 @@ export const publishFixToJira = async (
 
   const releaseVersion = await jira.findOrCreateVersion(
     project.id,
-    jiraFixVersion,
+    fixVersion,
     opts.dryRun
   );
 
-  log('fix version: ', jiraFixVersion, 'all keys: ', allKeys);
+  log('fix version: ', fixVersion, 'all keys: ', allKeys);
 
   return Promise.all(
     allKeys.map(async (k) => {
       // const v = `${pkg} ${version}`;
       await jira.editIssueFixVersions(
-        jiraFixVersion,
+        fixVersion,
         releaseVersion.id,
         k,
         opts.dryRun
