@@ -39,11 +39,13 @@ auth_npm: &auth_npm
   name: 'set up npm auth'
   command: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/repo/.npmrc
 
-configure_git: &configure_git
-  name: 'configure git'
-  command: >-
-    git config user.email "circleci@pie-framework.org"
-    git config user.name "Circle ci"
+configure_git_email: &configure_git_email
+  name: 'configure git email'
+  command: git config user.email "circleci@pie-framework.org"
+
+configure_git_user: &configure_git_user
+  name: 'configure git user'
+  command: git config user.name "Circle ci"
 
 restore_build_cache: &restore_build_cache
   keys:
@@ -70,7 +72,8 @@ jobs:
   release:
     <<: *defaults
     steps:
-      - run: *configure_git
+      - run: *configure_git_email
+      - run: *configure_git_user
       - run: *auth_npm
       - run: *avoid_hosts_unknown_github
       - restore_cache: *restore_src_cache
