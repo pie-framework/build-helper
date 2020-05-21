@@ -1,3 +1,10 @@
+# [5.1.0](https://github.com/pie-framework/build-helper/compare/5.0.2...5.1.0) (2020-05-21)
+
+
+### Features
+
+* call changeIssueStatus if tagToStatus is present ([98565d4](https://github.com/pie-framework/build-helper/commit/98565d44ed178d80f81f02d783f97772dfb47364))
+
 ## [5.0.2](https://github.com/pie-framework/build-helper/compare/5.0.1...5.0.2) (2020-05-20)
 
 
