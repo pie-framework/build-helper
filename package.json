@@ -19,7 +19,7 @@
     "git-raw-commits": "^2.0.7",
     "jira-connector": "^3.1.0",
     "invariant": "^2.2.4",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.19",
     "through2": "^3.0.1",
     "semver": "^7.3.2"
   },
