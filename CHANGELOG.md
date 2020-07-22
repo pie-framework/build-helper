@@ -1,3 +1,10 @@
+## [5.2.2](https://github.com/pie-framework/build-helper/compare/5.2.1...5.2.2) (2020-07-22)
+
+
+### Bug Fixes
+
+* fallback to [] if existing is not an array ([f6a104f](https://github.com/pie-framework/build-helper/commit/f6a104fa5135db7a550b8d96d5b1a7153bb42f15))
+
 ## [5.2.1](https://github.com/pie-framework/build-helper/compare/5.2.0...5.2.1) (2020-07-22)
 
 
