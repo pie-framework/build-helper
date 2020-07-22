@@ -111,7 +111,7 @@ export const mergeChangelogs = (
   existing: { hash: string }[],
   update: { hash: string }[]
 ): { hash: string }[] => {
-  const out = [...(existing || [])];
+  const out = [...(Array.isArray(existing) ? existing : [])];
 
   update.forEach((c) => {
     const hasAlready = out.some((e) => e.hash === c.hash);
