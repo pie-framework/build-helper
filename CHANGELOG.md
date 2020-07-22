@@ -1,3 +1,10 @@
+## [5.2.3](https://github.com/pie-framework/build-helper/compare/5.2.2...5.2.3) (2020-07-22)
+
+
+### Bug Fixes
+
+* bump lodash ([22d5a36](https://github.com/pie-framework/build-helper/commit/22d5a36ab926f04735a719ee02ab01b0adc36718))
+
 ## [5.2.2](https://github.com/pie-framework/build-helper/compare/5.2.1...5.2.2) (2020-07-22)
 
 
