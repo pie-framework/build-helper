@@ -1,3 +1,10 @@
+## [5.2.1](https://github.com/pie-framework/build-helper/compare/5.2.0...5.2.1) (2020-07-22)
+
+
+### Bug Fixes
+
+* **changelog:** handle null existing ([b90f55d](https://github.com/pie-framework/build-helper/commit/b90f55dbd9f5d0addb9ed502bd15e2dbe7ccbec2))
+
 # [5.2.0](https://github.com/pie-framework/build-helper/compare/5.1.1...5.2.0) (2020-05-21)
 
 
