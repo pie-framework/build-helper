@@ -11,8 +11,8 @@ export class Processes {
   }
 
   init() {
-    this.processes.forEach(p => {
-      p.process.on('error', e => {
+    this.processes.forEach((p) => {
+      p.process.on('error', (e) => {
         log('error: ', p.src, e);
       });
       p.process.on('data', () => {
@@ -22,7 +22,7 @@ export class Processes {
   }
 
   exit() {
-    this.processes.forEach(p => {
+    this.processes.forEach((p) => {
       log('killing: ', p.src);
       p.process.kill();
     });
@@ -39,7 +39,7 @@ export const watch = (
     throw new Error('Targets must be an array');
   }
 
-  const processes = targets.map(t => {
+  const processes = targets.map((t) => {
     const args = [
       t.src,
       '--watch',
@@ -47,16 +47,16 @@ export const watch = (
       t.target,
       '--ignore',
       'node_modules',
-      '--sourcemaps',
+      '--source-maps',
       'inline',
-      '--verbose'
+      '--verbose',
     ];
     log('start: ', t.src, t.target, args.join(' '));
 
     return {
       src: t.src,
       target: t.target,
-      process: spawn(babel, args, { stdio: 'inherit' })
+      process: spawn(babel, args, { stdio: 'inherit' }),
     };
   });
 
