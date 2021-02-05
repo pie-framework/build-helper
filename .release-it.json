@@ -13,5 +13,9 @@
       "preset": "angular",
       "infile": "CHANGELOG.md"
     }
+  },
+  "npm" : {
+    "publish": true,
+    "skipChecks": true
   }
 }
