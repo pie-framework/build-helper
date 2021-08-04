@@ -1,3 +1,10 @@
+## [5.2.7](https://github.com/pie-framework/build-helper/compare/5.2.4...5.2.7) (2021-08-04)
+
+
+### Bug Fixes
+
+* add no-verify-access ([fbaa33a](https://github.com/pie-framework/build-helper/commit/fbaa33a4f92f9600985e1870231fab25a8051ed5))
+
 ## [5.2.4](https://github.com/pie-framework/build-helper/compare/5.2.3...5.2.4) (2021-02-05)
 
 
