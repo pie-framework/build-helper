@@ -28,25 +28,21 @@ const getCiVars = (): CiVars | undefined => {
       branch: process.env.TRAVIS_BRANCH,
       email: 'travis@travis-ci.org',
       repo: process.env.TRAVIS_REPO_SLUG,
-      username: 'travis'
+      username: 'travis',
     };
   }
   if (process.env.CI) {
     return {
       branch: process.env.CIRCLE_BRANCH,
       email: 'circleci@circleci.com',
-      repo: `${process.env.CIRCLE_PROJECT_USERNAME}/${
-        process.env.CIRCLE_PROJECT_REPONAME
-      }`,
-      username: 'circleci'
+      repo: `${process.env.CIRCLE_PROJECT_USERNAME}/${process.env.CIRCLE_PROJECT_REPONAME}`,
+      username: 'circleci',
     };
   }
 };
 
 const getCurrentBranch = () =>
-  execSync(`git rev-parse --abbrev-ref HEAD`)
-    .toString()
-    .trim();
+  execSync(`git rev-parse --abbrev-ref HEAD`).toString().trim();
 
 /**
  * A utility class to help building pie monorepos.
@@ -66,7 +62,7 @@ export class Commands {
       jest: bin(this.projectRoot, 'jest'),
       babel: bin(this.projectRoot, 'babel'),
       now: bin(this.projectRoot, 'now'),
-      eslintignore: root(this.projectRoot, '.eslintignore')
+      eslintignore: root(this.projectRoot, '.eslintignore'),
     };
   }
 
@@ -90,7 +86,7 @@ export class Commands {
 
   async commit(files: string[], msg: string): Promise<(Buffer | string)[]> {
     const result = await this.runCmd(`git status -s`, {
-      cwd: this.projectRoot
+      cwd: this.projectRoot,
     });
 
     if (result === undefined || result.toString() === '') {
@@ -101,8 +97,8 @@ export class Commands {
 
     log('[commit] st: ', st);
     const paths = files
-      .map(f => `${relative(this.projectRoot, f)}`)
-      .filter(p => st.some(s => s.path === p));
+      .map((f) => `${relative(this.projectRoot, f)}`)
+      .filter((p) => st.some((s) => s.path === p));
 
     if (paths.length === 0) {
       return;
@@ -113,7 +109,7 @@ export class Commands {
     return this.runCmds(
       [`git add ${pathString}`, `git commit ${pathString} -m "${msg}"`],
       {
-        cwd: this.projectRoot
+        cwd: this.projectRoot,
       }
     );
   }
@@ -122,14 +118,14 @@ export class Commands {
     cmds: string[],
     opts: any = {}
   ): Promise<(Buffer | string | undefined)[]> {
-    return this.series(cmds, cmd => this.runCmd(cmd, opts));
+    return this.series(cmds, (cmd) => this.runCmd(cmd, opts));
   }
 
   series(cmds: string[], fn: (cmd: string) => Promise<any>) {
     return cmds.reduce((p, cmd) => {
       return p
         .then(() => fn(cmd))
-        .catch(e => {
+        .catch((e) => {
           log('error in series occured:', e.message);
           throw e;
         });
@@ -162,11 +158,11 @@ export class Commands {
     const packagesDir = join(this.projectRoot, 'packages');
     const allPackages = this.getPackages(packagesDir);
     const packages = this.args.scope
-      ? allPackages.filter(p => basename(p.dir) === this.args.scope)
+      ? allPackages.filter((p) => basename(p.dir) === this.args.scope)
       : allPackages;
 
     const paths = await series(
-      packages.map(pkg => async () => {
+      packages.map((pkg) => async () => {
         // This function is called from prepack - so we don't know if it's next or not
         const clPath = await writeChangelogJsonForPackage(pkg, false);
         await writeChangelogJsonForPackage(pkg, true);
@@ -192,13 +188,11 @@ export class Commands {
         '-----> running in TRAVIS - checkout the branch (detached head doesnt work with lerna)'
       );
       await this.runCmds([
-        `git remote set-url origin https://${GITHUB_TOKEN}@github.com/${
-          ciVars.repo
-        }.git`,
+        `git remote set-url origin https://${GITHUB_TOKEN}@github.com/${ciVars.repo}.git`,
         `git checkout ${ciVars.branch}`,
         'git rev-parse --short HEAD',
         `git config user.name "${ciVars.username}"`,
-        `git config user.email "${ciVars.email}"`
+        `git config user.email "${ciVars.email}"`,
       ]);
 
       await this.runCmds([`git status`]);
@@ -228,7 +222,7 @@ export class Commands {
          *
          * We would want `${sha}~${refCount}` instead.
          */
-        '--force-publish'
+        '--force-publish',
       ];
 
       if (this.args.skipForcePublish) {
@@ -238,7 +232,9 @@ export class Commands {
       return nextOpts.join(' ');
     };
 
-    const releaseCmd = `${this.p.lerna} publish --conventional-commits ${
+    const releaseCmd = `${
+      this.p.lerna
+    } publish --conventional-commits --no-verify-access ${
       this.args.lernaLogLevel ? `--loglevel ${this.args.lernaLogLevel}` : ''
     } ${this.args.interactive ? '' : '--yes'} ${
       this.args.next ? getNextOpts() : ''
@@ -266,18 +262,14 @@ export class Commands {
 
   lint() {
     return this.runCmds([
-      `${this.p.lerna} exec -- ${this.p.eslint} --ignore-path ${
-        this.p.eslintignore
-      } --ext .js --ext .jsx src`
+      `${this.p.lerna} exec -- ${this.p.eslint} --ignore-path ${this.p.eslintignore} --ext .js --ext .jsx src`,
     ]);
   }
 
   babel() {
     console.log('>> babel override for babel 7');
     return this.runCmds([
-      `${this.p.lerna} exec -- ${
-        this.p.babel
-      } --ignore '**/__test__/**','**/__tests__/**' src -d lib --source-maps --root-mode upward`
+      `${this.p.lerna} exec -- ${this.p.babel} --ignore '**/__test__/**','**/__tests__/**' src -d lib --source-maps --root-mode upward`,
     ]);
   }
 
@@ -287,7 +279,7 @@ export class Commands {
   }
 
   execute() {
-    const knownActions = this.args._.filter(a => this[a]);
+    const knownActions = this.args._.filter((a) => this[a]);
 
     if (knownActions.length !== this.args._.length) {
       return Promise.reject(new Error(`unknown actions: ${this.args._}`));
@@ -302,11 +294,11 @@ export class Commands {
           return p;
         });
       }, Promise.resolve({}))
-      .catch(e => {
+      .catch((e) => {
         err(e.message);
         throw e;
       })
-      .then(r => {
+      .then((r) => {
         log('done!');
         return r;
       });
