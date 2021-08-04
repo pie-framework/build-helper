@@ -1,3 +1,11 @@
+## [5.2.5](https://github.com/pie-framework/build-helper/compare/5.2.3...5.2.5) (2021-08-04)
+
+
+### Bug Fixes
+
+* add no-verify-access ([fbaa33a](https://github.com/pie-framework/build-helper/commit/fbaa33a4f92f9600985e1870231fab25a8051ed5))
+* chance source maps flag ([1c19a68](https://github.com/pie-framework/build-helper/commit/1c19a68384a6c897cc208286ac7abbc83dc6eeb8))
+
 ## [5.2.3](https://github.com/pie-framework/build-helper/compare/5.2.2...5.2.3) (2020-07-22)
 
 
