@@ -1,3 +1,10 @@
+## [5.2.4](https://github.com/pie-framework/build-helper/compare/5.2.3...5.2.4) (2021-02-05)
+
+
+### Bug Fixes
+
+* chance source maps flag ([1c19a68](https://github.com/pie-framework/build-helper/commit/1c19a68384a6c897cc208286ac7abbc83dc6eeb8))
+
 ## [5.2.3](https://github.com/pie-framework/build-helper/compare/5.2.2...5.2.3) (2020-07-22)
 
 
