@@ -45,7 +45,7 @@ const getCurrentBranch = () =>
   execSync(`git rev-parse --abbrev-ref HEAD`).toString().trim();
 
 /**
- * A utility class to help building pie monorepos.
+ * A utility class to help building pie monorepos. 
  */
 export class Commands {
   private p: any;
