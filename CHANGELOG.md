@@ -1,3 +1,10 @@
+## [5.2.12](https://github.com/pie-framework/build-helper/compare/5.2.9...5.2.12) (2026-02-09)
+
+
+### Bug Fixes
+
+* Prepare for Github Actions CI ([9e1e486](https://github.com/pie-framework/build-helper/commit/9e1e486e8e0bb550d03239a3f27f8f592a44748e))
+
 ## [5.2.9](https://github.com/pie-framework/build-helper/compare/5.2.8...5.2.9) (2021-08-04)
 
 ## [5.2.8](https://github.com/pie-framework/build-helper/compare/5.2.7...5.2.8) (2021-08-04)
