@@ -1,6 +1,6 @@
 {
   "name": "@pie-framework/build-helper",
-  "version": "5.2.9",
+  "version": "5.2.10",
   "description": "",
   "main": "lib/index.js",
   "types": "/lib/index.d.ts",

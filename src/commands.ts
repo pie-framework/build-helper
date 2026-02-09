@@ -20,23 +20,29 @@ type CiVars = {
   repo: string;
   username: string;
   email: string;
+  gh_token: string;
 };
 
 const getCiVars = (): CiVars | undefined => {
+  const { GITHUB_TOKEN } = process.env;
   if (process.env.TRAVIS) {
+    invariant(GITHUB_TOKEN, 'GITHUB_TOKEN env var must be defined');
     return {
       branch: process.env.TRAVIS_BRANCH,
       email: 'travis@travis-ci.org',
       repo: process.env.TRAVIS_REPO_SLUG,
       username: 'travis',
+      gh_token: GITHUB_TOKEN,
     };
   }
-  if (process.env.CI) {
+  if (process.env.CIRCLE) {
+    invariant(GITHUB_TOKEN, 'GITHUB_TOKEN env var must be defined');
     return {
       branch: process.env.CIRCLE_BRANCH,
       email: 'circleci@circleci.com',
       repo: `${process.env.CIRCLE_PROJECT_USERNAME}/${process.env.CIRCLE_PROJECT_REPONAME}`,
       username: 'circleci',
+      gh_token: GITHUB_TOKEN,
     };
   }
 };
@@ -177,18 +183,13 @@ export class Commands {
   async release() {
     cmdLog('----> release', this.args);
 
-    const { GITHUB_TOKEN } = process.env;
-
     const ciVars = getCiVars();
 
     if (ciVars) {
-      invariant(GITHUB_TOKEN, 'GITHUB_TOKEN env var must be defined');
+      log('-----> running in CI - checkout the branch (detached head doesnt work with lerna)');
 
-      log(
-        '-----> running in TRAVIS - checkout the branch (detached head doesnt work with lerna)'
-      );
       await this.runCmds([
-        `git remote set-url origin https://${GITHUB_TOKEN}@github.com/${ciVars.repo}.git`,
+        `git remote set-url origin https://${ciVars.gh_token}@github.com/${ciVars.repo}.git`,
         `git checkout ${ciVars.branch}`,
         'git rev-parse --short HEAD',
         `git config user.name "${ciVars.username}"`,
