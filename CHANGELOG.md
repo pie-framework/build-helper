@@ -1,3 +1,5 @@
+## [5.2.12](https://github.com/pie-framework/build-helper/compare/5.2.10...5.2.12) (2026-02-09)
+
 ## [5.2.10](https://github.com/pie-framework/build-helper/compare/5.2.11...5.2.10) (2026-02-09)
 
 ## [5.2.9](https://github.com/pie-framework/build-helper/compare/5.2.8...5.2.9) (2021-08-04)
